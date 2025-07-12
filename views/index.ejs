@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔗 Simple URL Shortener</h1>
+
+      <form action="/" method="post">
+        <label for="url">URL</label>
+        <input type="text" name="url" id="url" placeholder="Enter URL" />
+        <label for="shortcode">Shortcode</label>
+        <input
+          type="text"
+          name="shortcode"
+          id="shortcode"
+          placeholder="Enter Shortcode"
+        />
+        <button type="submit">Shorten</button>
+      </form>
+
+      <h2>Shortened URLs</h2>
+      <ul>
+        <ul>
+          <%Object.entries(allLinks).map(([shortcode, url]) =>{%>
+          <li>
+            <a href="/<%=shortcode%>" target="_blank">
+              <%=host%>/<%=shortcode%>
+            </a>
+            - <%=url%>
+          </li>
+          <%})%>
+        </ul>
+      </ul>
+    </div>
+  </body>
+</html>

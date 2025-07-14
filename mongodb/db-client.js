@@ -5,3 +5,4 @@ await client.connect();
 
 const db = client.db("UrlShortenerDB");
 export const shortenerCollection = db.collection("links");
+    

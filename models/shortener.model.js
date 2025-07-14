@@ -1,12 +1,15 @@
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
+import { shortenerCollection } from "../mongodb/db-client.js";
 
 const linkFilePath = path.join("data", "links.json");
 
 async function getDataFromLinksFile() {
   try {
     const data = await readFile(linkFilePath, "utf-8");
-    return JSON.parse(data);
+    const dbdata = await shortenerCollection.find().toArray();
+    console.log("data recieved from db", dbdata);
+    return dbdata;
   } catch (err) {
     if (err.code === "ENONT") {
       //if links.json doesn't exists
@@ -17,8 +20,9 @@ async function getDataFromLinksFile() {
   }
 }
 
-async function pushLinksToLinksFile(linksData) {
-  await writeFile(linkFilePath, JSON.stringify(linksData));
-  console.log("Link added successfully", linksData);
+async function pushLinksToLinksFile(newLink) {
+  await shortenerCollection.insertOne(newLink);
+  // await writeFile(linkFilePath, JSON.stringify(linksData));
+  // console.log("Link added successfully", linksData);
 }
 export { getDataFromLinksFile, pushLinksToLinksFile };

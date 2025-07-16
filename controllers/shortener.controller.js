@@ -10,6 +10,7 @@ const getShortenerPage = async (req, res) => {
     const allLinks = await getDataFromLinksFile(); //get data from model
     // console.log("allLinks==>", allLinks);
 
+    //render index.ejs file under views
     return res.render("index", { allLinks, host: req.host });
   } catch (err) {
     console.log(err);

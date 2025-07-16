@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gradient-to-r from-[#edf2fb] to-[#d7e3fc] min-h-screen pb-10">
+    <!-- 🌐 Centered, Bold, Fixed Navbar -->
+
+    <nav
+      class="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-gray-100"
+    >
+      <div
+        class="max-w-5xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4"
+      >
+        <a href="/" class="text-2xl font-extrabold text-[#5b8def]"
+          >🔗 Shortify</a
+        >
+        <div class="flex gap-8 text-base font-semibold">
+          <a href="/" class="text-gray-800 hover:text-[#5b8def] transition"
+            >Home</a
+          >
+          <a href="/login" class="text-gray-800 hover:text-[#5b8def] transition"
+            >Login</a
+          >
+          <a
+            href="/signup"
+            class="text-gray-800 hover:text-[#5b8def] transition"
+            >Signup</a
+          >
+        </div>
+      </div>
+    </nav>
+  </body>
+</html>

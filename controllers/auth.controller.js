@@ -1,5 +1,6 @@
 import { getRegisteredUsers } from "../models/auth.model.js";
 import { registeredUsersCollection } from "../mongodb/db-client.js";
+import bcrypt from "bcrypt";
 
 //GET SIGN UP & LOGIN PAGE---------------------------
 export const getLoginPage = (req, res) => {
@@ -46,8 +47,13 @@ export const postLoginUser = async (req, res) => {
       return registeredUser.email === email;
     });
 
-    //check if password exists
-    if (registeredUser.password !== password)
+    //check if password matches
+    const isPasswordMatch = await bcrypt.compare(
+      password,
+      registeredUser.password
+    );
+
+    if (!isPasswordMatch)
       return res.json({ success: false, error: "password" });
 
     res.json({ success: true });
@@ -58,6 +64,7 @@ export const postLoginUser = async (req, res) => {
 
 export const postSignupUser = async (req, res) => {
   const { name, email, password } = req.body;
+
   console.log("Sign-up ReqBody==>", { name, email, password });
 
   const registeredUsers = await getRegisteredUsers();
@@ -70,6 +77,12 @@ export const postSignupUser = async (req, res) => {
   if (isEmailAlreadyRegistered)
     return res.json({ success: false, error: "email" });
 
-  await registeredUsersCollection.insertOne({ name, email, password });
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await registeredUsersCollection.insertOne({
+    name,
+    email,
+    password: hashedPassword,
+  });
   res.json({ success: true });
 };

@@ -1,7 +1,7 @@
 import { getRegisteredUsers } from "../models/auth.model.js";
 import { registeredUsersCollection } from "../mongodb/db-client.js";
 import bcrypt from "bcrypt";
-
+import argon2 from "argon2";
 //GET SIGN UP & LOGIN PAGE---------------------------
 export const getLoginPage = (req, res) => {
   try {
@@ -48,11 +48,18 @@ export const postLoginUser = async (req, res) => {
     });
 
     //check if password matches
-    const isPasswordMatch = await bcrypt.compare(
-      password,
-      registeredUser.password
-    );
 
+    //password hashing using bcrypt
+    // const isPasswordMatch = await bcrypt.compare(
+    //   password,
+    //   registeredUser.password
+    // );
+
+    //password hashing using argon2
+    const isPasswordMatch = await argon2.verify(
+      registeredUser.password,
+      password
+    );
     if (!isPasswordMatch)
       return res.json({ success: false, error: "password" });
 
@@ -77,7 +84,8 @@ export const postSignupUser = async (req, res) => {
   if (isEmailAlreadyRegistered)
     return res.json({ success: false, error: "email" });
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await argon2.hash(password);
 
   await registeredUsersCollection.insertOne({
     name,

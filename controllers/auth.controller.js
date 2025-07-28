@@ -1,7 +1,8 @@
 import { getRegisteredUsers } from "../models/auth.model.js";
 import { registeredUsersCollection } from "../mongodb/db-client.js";
-import bcrypt from "bcrypt";
 import argon2 from "argon2";
+import { generateJwt } from "./auth.services.js";
+
 //GET SIGN UP & LOGIN PAGE---------------------------
 export const getLoginPage = (req, res) => {
   try {
@@ -31,9 +32,9 @@ export const postLoginUser = async (req, res) => {
     //   `isLoggedIn=true; Path=/; `,
     //   `email=${email}; Path=/; HttpOnly`,
     // ]);
-    res.cookie("isLoggedIn", true, {
-      signed: true,
-    });
+    // res.cookie("isLoggedIn", true, {
+    //   signed: true,
+    // });
 
     const registeredUsers = await getRegisteredUsers();
     const isEmailRegistered = registeredUsers.some((registeredUser) => {
@@ -49,7 +50,7 @@ export const postLoginUser = async (req, res) => {
 
     //check if password matches
 
-    //password hashing using bcrypt
+    //password hashing using bcrypt:-
     // const isPasswordMatch = await bcrypt.compare(
     //   password,
     //   registeredUser.password
@@ -63,7 +64,15 @@ export const postLoginUser = async (req, res) => {
     if (!isPasswordMatch)
       return res.json({ success: false, error: "password" });
 
+    const payload = {
+      id: registeredUser._id,
+      name: registeredUser.name,
+      email: registeredUser.email,
+    };
+    const token = generateJwt(payload);
+    res.cookie("access_token", token);
     res.json({ success: true });
+    res.redirect("/");
   } catch (err) {
     console.log(err);
   }

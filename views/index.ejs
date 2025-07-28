@@ -10,6 +10,11 @@
     <%- include('./partials/header.ejs')%>
     <!-- 🧩 Main Content Area -->
     <div class="pt-28 w-full max-w-xl mx-auto px-4">
+      <% if (user) { %>
+      <p>You are Logged in</p>
+      <% } else { %>
+      <p>You are not logged in</p>
+      <% } %>
       <div class="bg-white rounded-2xl shadow-2xl p-8">
         <h1 class="text-center text-2xl font-bold text-gray-800 mb-7">
           🔗 Simple URL Shortener

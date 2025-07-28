@@ -103,3 +103,8 @@ export const postSignupUser = async (req, res) => {
   });
   res.json({ success: true });
 };
+
+export const logoutUser = (req, res) => {
+  res.clearCookie("access_token");
+  res.redirect("/login");
+};

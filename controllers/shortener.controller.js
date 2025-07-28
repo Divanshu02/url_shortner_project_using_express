@@ -7,11 +7,15 @@ import {
 
 const getShortenerPage = async (req, res) => {
   try {
-    const allLinks = await getDataFromLinksFile(); //get data from model
-    // console.log("allLinks==>", allLinks);
+    if (req.user) {
+      const allLinks = await getDataFromLinksFile(); //get data from model
+      // console.log("allLinks==>", allLinks);
 
-    //render index.ejs file under views
-    return res.render("index", { allLinks, host: req.host });
+      //render index.ejs file under views
+      return res.render("index", { allLinks, host: req.host });
+    } else {
+      res.redirect("/login");
+    }
   } catch (err) {
     console.log(err);
     return res.status(500).send("Internal Server Error");
@@ -35,10 +39,9 @@ const postURLshortner = async (req, res) => {
     //shortcode already exists
     return res.status(400).send("shortCode already exists, pls choose diff");
   } else {
-    
     const newLink = { shortcode: shortcode, url: url };
 
-    //push newlink to Database 
+    //push newlink to Database
     await pushLinksToLinksFile(newLink);
     res.redirect("/");
   }
@@ -50,9 +53,7 @@ const redirectToShortLink = async (req, res) => {
   const linksData = await getDataFromLinksFile(); //get data from model
 
   //get data from db whose obj matched with the params shortcode
-  const link = linksData.find(
-    (link) => link.shortcode === shortcode
-  );
+  const link = linksData.find((link) => link.shortcode === shortcode);
   if (!link) return res.status(400).send("404 error occured");
 
   return res.redirect(link?.url);

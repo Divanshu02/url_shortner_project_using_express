@@ -19,9 +19,16 @@
           >🔗 Shortify</a
         >
         <div class="flex gap-8 text-base font-semibold">
+          <% if(user){%>
           <a href="/" class="text-gray-800 hover:text-[#5b8def] transition"
             >Home</a
           >
+          <a
+            href="/logout"
+            class="text-gray-800 hover:text-[#5b8def] transition"
+            >Logout</a
+          >
+          <%} else {%>
           <a href="/login" class="text-gray-800 hover:text-[#5b8def] transition"
             >Login</a
           >
@@ -30,6 +37,7 @@
             class="text-gray-800 hover:text-[#5b8def] transition"
             >Signup</a
           >
+          <%}%>
         </div>
       </div>
     </nav>

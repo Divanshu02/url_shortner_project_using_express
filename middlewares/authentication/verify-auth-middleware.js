@@ -12,7 +12,10 @@ export const verifyAuthentication = (req, res, next) => {
     req.user = decoded_token;
     console.log("req.user==>", req.user);
   } catch (error) {
+    console.log("user logout============================");
+
     req.user = null;
+    // res.redirect("/");
   }
   return next();
 };

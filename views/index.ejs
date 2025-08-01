@@ -75,15 +75,46 @@
               >
                 <%= host %>/<%= link.shortcode %>
               </a>
+
               <span
                 class="text-gray-600 text-sm max-w-[50%] break-words text-right"
-                >→ <%= link.url %></span
               >
+                → <%= link.url %>
+              </span>
+
+              <!-- ACTION BUTTONS WRAPPED WITH SPACING -->
+              <div class="flex items-center space-x-4 ml-4">
+                <p
+                  class="cursor-pointer text-blue-600"
+                  onclick="editShortcode('<%=link._id%>')"
+                >
+                  Edit
+                </p>
+                <p
+                  class="cursor-pointer text-red-600"
+                  onclick="deleteShortcode('<%=link._id%>')"
+                >
+                  Delete
+                </p>
+              </div>
             </li>
             <% }); %>
           </ul>
         </div>
       </div>
     </div>
+    <script>
+      function editShortcode(id) {
+        window.location.href = `/editShortener/${id}`;
+
+        console.log("shortcodeId==>", id);
+      }
+
+      function deleteShortcode(id) {
+        window.location.href = `/deleteShortener/${id}`;
+
+        console.log("shortcodeId==>", id);
+      }
+    </script>
   </body>
 </html>

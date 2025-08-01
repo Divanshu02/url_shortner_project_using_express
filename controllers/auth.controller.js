@@ -21,6 +21,7 @@ export const getSignupPage = (req, res) => {
   } catch (err) {}
 };
 
+
 // POST LOGIN & SIGNUP-----------------------
 
 export const postLoginUser = async (req, res) => {

@@ -5,6 +5,7 @@ import { generateJwt } from "./auth.services.js";
 
 //GET SIGN UP & LOGIN PAGE---------------------------
 export const getLoginPage = (req, res) => {
+  if (req.user) return res.redirect("/");
   try {
     // console.log("cookies==>", req.headers.cookie, typeof req.headers.cookie);
     console.log("cookie==>", req.signedCookies.idAdmin);
@@ -16,11 +17,12 @@ export const getLoginPage = (req, res) => {
 };
 
 export const getSignupPage = (req, res) => {
+  if (req.user) return res.redirect("/");
+
   try {
     return res.render("../views/auth/Signup.ejs");
   } catch (err) {}
 };
-
 
 // POST LOGIN & SIGNUP-----------------------
 
@@ -67,11 +69,17 @@ export const postLoginUser = async (req, res) => {
 
     const payload = {
       id: registeredUser._id,
-      name: registeredUser.name,
-      email: registeredUser.email,
+      // name: registeredUser.name,
+      // email: registeredUser.email,
     };
-    const token = generateJwt(payload);
+    const token = generateJwt(payload, "1m");
     res.cookie("access_token", token);
+
+    const payload2 = {
+      session_id: registeredUser._id,
+    };
+    const refreshToken = generateJwt(payload2, "20d");
+    res.cookie("refresh_token", refreshToken);
     res.json({ success: true });
     res.redirect("/");
   } catch (err) {
@@ -107,5 +115,6 @@ export const postSignupUser = async (req, res) => {
 
 export const logoutUser = (req, res) => {
   res.clearCookie("access_token");
+  res.clearCookie("refresh_token");
   res.redirect("/login");
 };

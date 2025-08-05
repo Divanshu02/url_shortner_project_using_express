@@ -20,7 +20,7 @@ async function getDataFromLinksFile(id) {
     throw err;
   }
 }
-
+  
 async function pushLinksToLinksFile(newLink) {
   await shortenerCollection.insertOne(newLink);
   // await writeFile(linkFilePath, JSON.stringify(linksData));

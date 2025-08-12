@@ -67,7 +67,7 @@ const postURLshortner = async (req, res) => {
 const redirectToShortLink = async (req, res) => {
   const { shortcode } = req.params;
 
-  const linksData = await getDataFromLinksFile(req.user.id); //get data from model
+  const linksData = await getDataFromLinksFile(req?.user?.id); //get data from model
 
   //get data from db whose obj matched with the params shortcode
   const link = linksData.find((link) => link.shortcode === shortcode);

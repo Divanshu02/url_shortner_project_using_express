@@ -1,7 +1,11 @@
 import { getRegisteredUsers } from "../models/auth.model.js";
-import { registeredUsersCollection } from "../mongodb/db-client.js";
+import {
+  registeredUsersCollection,
+  sessionsCollection,
+} from "../mongodb/db-client.js";
 import argon2 from "argon2";
 import { generateJwt } from "./auth.services.js";
+import { ObjectId } from "mongodb";
 
 //GET SIGN UP & LOGIN PAGE---------------------------
 export const getLoginPage = (req, res) => {
@@ -13,6 +17,7 @@ export const getLoginPage = (req, res) => {
     return res.render("../views/auth/Login.ejs");
   } catch (err) {
     console.log(err);
+    // res.redirect("/login");
   }
 };
 
@@ -29,8 +34,9 @@ export const getSignupPage = (req, res) => {
 export const postLoginUser = async (req, res) => {
   try {
     console.log("ReqBody==>", req.body);
-
+    if (!req.body) return res.json("email or password is missing");
     const { email, password } = req.body;
+
     // res.setHeader("Set-Cookie", [
     //   `isLoggedIn=true; Path=/; `,
     //   `email=${email}; Path=/; HttpOnly`,
@@ -67,18 +73,26 @@ export const postLoginUser = async (req, res) => {
     if (!isPasswordMatch)
       return res.json({ success: false, error: "password" });
 
+    //Generate access token
     const payload = {
       id: registeredUser._id,
-      // name: registeredUser.name,
-      // email: registeredUser.email,
+      name: registeredUser.name,
+      email: registeredUser.email,
     };
-    const token = generateJwt(payload, "1m");
-    res.cookie("access_token", token);
+    const access_token = generateJwt(payload, "1m");
+    res.cookie("access_token", access_token);
 
+    //Generate refresh token
     const payload2 = {
-      session_id: registeredUser._id,
+      id: registeredUser._id,
     };
-    const refreshToken = generateJwt(payload2, "20d");
+    const refreshToken = generateJwt(payload2, "4m");
+    //save the refresh token in session collection in db
+    await sessionsCollection.insertOne({
+      user_id: registeredUser._id.toString(),
+      refresh_token: refreshToken,
+      isRevoked: false,
+    });
     res.cookie("refresh_token", refreshToken);
     res.json({ success: true });
     res.redirect("/");

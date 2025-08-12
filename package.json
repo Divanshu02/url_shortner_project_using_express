@@ -4,7 +4,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node --env-file=.env --watch server",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -22,5 +23,3 @@
     "mongoose": "^8.16.3"
   }
 }
-
-

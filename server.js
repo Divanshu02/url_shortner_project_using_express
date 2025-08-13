@@ -14,9 +14,11 @@ app.use(cookieParser("my-super-secret-key"));
 
 app.use(verifyAuthentication); //auth middleware
 app.use((req, res, next) => {
+  console.log("ALWAYS RUN ===============>", req.user);
+
   res.locals.user = req.user;
   return next();
-}); 
+});
 
 // 👇 Middleware
 app.use(express.json()); // ✅ add this at the top

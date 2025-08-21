@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Email</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-gradient-to-r from-[#edf2fb] to-[#d7e3fc] min-h-screen flex items-center justify-center px-4"
+  >
+    <%- include('../partials/header.ejs')%>
+
+    <div
+      class="bg-white shadow-2xl rounded-2xl max-w-lg w-full p-8 text-center border border-gray-200"
+    >
+      <!-- Header -->
+      <h1 class="text-2xl font-bold text-indigo-600 mb-4">Verify Your Email</h1>
+      <p class="text-gray-600 mb-6">
+        We’ve sent a verification link to your email address:
+        <span class="font-medium text-gray-800"><%= email %></span>
+      </p>
+
+      <!-- Illustration -->
+      <div class="flex justify-center mb-6">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/561/561127.png"
+          alt="Email Icon"
+          class="w-20 h-20"
+        />
+      </div>
+
+      <!-- Enter Code Form -->
+      <form action="/verify-email-token" method="POST" class="space-y-4">
+        <label for="code" class="block text-gray-700 font-medium"
+          >Enter 8-Digit Verification Code</label
+        >
+        <input
+          type="text"
+          id="code"
+          name="code"
+          maxlength="8"
+          required
+          class="w-full text-center tracking-widest text-lg font-bold border-2 border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="XXXXXXXX"
+        />
+        <button
+          type="submit"
+          class="w-full bg-blue-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+        >
+          Verify Code
+        </button>
+      </form>
+
+      <!-- Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+        <a
+          href="/resend-verification"
+          class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+        >
+          🔄 Resend Verification Email
+        </a>
+        <a
+          href="/profile"
+          class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-xl shadow-md transition"
+        >
+          ↩️ Back to Profile
+        </a>
+      </div>
+
+      <!-- Extra note -->
+      <p class="text-sm text-gray-500 mt-6">
+        Didn’t get the email? Check your spam folder or try resending.
+      </p>
+    </div>
+  </body>
+</html>

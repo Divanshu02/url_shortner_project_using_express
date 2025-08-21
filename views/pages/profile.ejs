@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gradient-to-r from-[#edf2fb] to-[#d7e3fc] min-h-screen pb-10">
+    <%- include('../partials/header.ejs')%>
+
+    <!-- 🧩 Profile Section -->
+    <div class="pt-28 w-full max-w-xl mx-auto px-4">
+      <% if (registeredUser) { %>
+      <div
+        class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200"
+      >
+        <!-- Profile Header -->
+        <div
+          class="bg-gradient-to-r from-indigo-500 to-blue-500 p-6 text-white text-center"
+        >
+          <h2 class="text-2xl font-bold tracking-wide">My Profile</h2>
+          <p class="text-sm opacity-90">
+            Welcome back, <%= registeredUser.name.toUpperCase() %> 👋
+          </p>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="p-6 space-y-4">
+          <div class="flex justify-between border-b pb-2">
+            <span class="font-medium text-gray-600">Email</span>
+            <span class="text-gray-800"><%= registeredUser.email %></span>
+          </div>
+
+          <div class="flex justify-between border-b pb-2">
+            <span class="font-medium text-gray-600">Total Links Created</span>
+            <span class="text-gray-800"><%= totalLinks %></span>
+          </div>
+
+          <div class="flex justify-between">
+            <span class="font-medium text-gray-600">Member Since</span>
+            <span class="text-gray-800">
+              <%= new Date(registeredUser.createdAt).toLocaleDateString() %>
+            </span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div
+          class="p-6 border-t flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+        >
+          <!-- <a
+            href="/edit-profile"
+            class="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+          >
+            ✏️ Edit Profile
+          </a>
+          <a
+            href="/change-password"
+            class="flex-1 text-center bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+          >
+            🔒 Change Password
+          </a> -->
+          <a
+            href="/logout"
+            class="flex-1 text-center bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+          >
+            🚪 Logout
+          </a>
+        </div>
+        <% if (registeredUser.isEmailVerified) { %>
+        <!-- Email Verified -->
+        <div class="flex justify-center mt-4">
+          <span
+            class="bg-green-500 text-white font-medium py-2 px-4 rounded-xl shadow-md"
+          >
+            ✅ Email Verified
+          </span>
+        </div>
+        <% } else { %>
+        <!-- Email Not Verified -->
+        <div
+          class="flex flex-col sm:flex-row justify-center items-center gap-3 mt-4"
+        >
+          <span class="text-red-600 font-medium"> ❌ Email Not Verified </span>
+          <a
+            href="/verify-email"
+            target="_blank"
+            class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+          >
+            ✉️ Verify Email
+          </a>
+        </div>
+        <% } %>
+      </div>
+      <% } %>
+    </div>
+  </body>
+</html>

@@ -1,4 +1,8 @@
-import { getRegisteredUsers } from "../models/auth.model.js";
+import {
+  getRegisteredUser,
+  getRegisteredUsers,
+  getTotalNoOfLinks,
+} from "../models/auth.model.js";
 import {
   registeredUsersCollection,
   sessionsCollection,
@@ -117,6 +121,8 @@ export const postSignupUser = async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    createdAt: Date.now(),
+    isEmailValid: false,
   });
   res.json({ success: true });
 };
@@ -131,4 +137,36 @@ export const logoutUser = async (req, res) => {
   res.clearCookie("access_token");
   res.clearCookie("refresh_token");
   res.redirect("/login");
+};
+
+//PROFILE-PAGE
+
+export const getProfilePage = async (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  const registeredUser = await getRegisteredUser(req.user);
+  const totalLinks = await getTotalNoOfLinks(req.user);
+  console.log("registeredUser======>", registeredUser);
+
+  return res.render("../views/pages/profile.ejs", {
+    totalLinks,
+    registeredUser,
+  });
+};
+
+export const getVerifyEmailPage = (req, res) => {
+  if (!req.user) return res.redirect("/login");
+
+  return res.render("../views/pages/verifyemail.ejs", {
+    email: req.user.email,
+  });
+};
+
+export const getEditProfilePage = (req, res) => {
+  try {
+    
+  } catch {}
+};
+export const getChangePasswordPage = (req, res) => {
+  try {
+  } catch {}
 };

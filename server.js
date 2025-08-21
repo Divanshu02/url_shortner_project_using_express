@@ -14,7 +14,7 @@ app.use(cookieParser("my-super-secret-key"));
 
 app.use(verifyAuthentication); //auth middleware
 app.use((req, res, next) => {
-  console.log("ALWAYS RUN ===============>", req.user);
+  console.log("Exact User===>", req.user);
 
   res.locals.user = req.user;
   return next();
@@ -26,7 +26,7 @@ app.use(express.json()); // ✅ add this at the top
 app.use(authRoutes); //middleware having auth routes
 app.use(shortnerRoutes); //middleware having routes
 
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`server running on ${PORT} port`);
 });

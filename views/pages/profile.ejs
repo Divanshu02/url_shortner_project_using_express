@@ -54,13 +54,14 @@
             class="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
           >
             ✏️ Edit Profile
-          </a>
+          </a> -->
           <a
             href="/change-password"
             class="flex-1 text-center bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
+            target="_blank"
           >
             🔒 Change Password
-          </a> -->
+          </a>
           <a
             href="/logout"
             class="flex-1 text-center bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition"
@@ -68,7 +69,7 @@
             🚪 Logout
           </a>
         </div>
-        <% if (registeredUser.isEmailVerified) { %>
+        <% if (registeredUser.isEmailValid) { %>
         <!-- Email Verified -->
         <div class="flex justify-center mt-4">
           <span

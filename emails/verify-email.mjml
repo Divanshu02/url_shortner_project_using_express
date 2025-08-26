@@ -1,0 +1,73 @@
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif" />
+      <mj-text font-size="14px" line-height="22px" color="#2A2A2A" />
+      <mj-button
+        background-color="#3B82F6"
+        color="#ffffff"
+        padding="14px 28px"
+        border-radius="8px"
+        font-weight="600"
+      />
+    </mj-attributes>
+
+    <mj-preview>Email verification</mj-preview>
+  </mj-head>
+
+  <mj-body background-color="#F4F6FA">
+    <!-- Heading -->
+    <mj-section>
+      <mj-column>
+        <mj-text align="center" font-size="20px" font-weight="700">
+          Verify Your Email
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Card -->
+    <mj-section background-color="#ffffff" border-radius="12px">
+      <mj-column padding="24px">
+        <!-- Intro -->
+        <mj-text>
+          Hi,<br /><br />
+          Please use the following token to verify your email:
+        </mj-text>
+
+        <!-- Token (bold only, no color) -->
+        <mj-text align="center" font-size="22px" padding="16px 0">
+          <strong>{{token}}</strong>
+        </mj-text>
+
+        <mj-divider border-color="#E5E7EB" padding="16px 0" />
+
+        <!-- Alternative -->
+        <mj-text>
+          Or, simply verify your email by clicking the button below:
+        </mj-text>
+
+        <!-- Button -->
+        <mj-button href="{{verifyUrl}}"> Verify Email </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <!-- Note about spam -->
+    <mj-section>
+      <mj-column>
+        <mj-text align="center" font-size="12px" color="#666666">
+          If you don’t see the email in your inbox, please check your Spam or
+          Junk folder.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section>
+      <mj-column>
+        <mj-text align="center" font-size="12px" color="#888888">
+          © 2025 Your App. All rights reserved.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

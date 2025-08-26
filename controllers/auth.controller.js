@@ -2,14 +2,27 @@ import {
   getRegisteredUser,
   getRegisteredUsers,
   getTotalNoOfLinks,
+  insertVerifyEmailTokenInDB,
+  updateUserPasswordInDB,
 } from "../models/auth.model.js";
 import {
   registeredUsersCollection,
   sessionsCollection,
+  verifyEmailTokensCollection,
 } from "../mongodb/db-client.js";
 import argon2 from "argon2";
-import { generateJwt } from "./auth.services.js";
+import {
+  createVerifyEmailLink,
+  generateJwt,
+  generateRandomToken,
+} from "./auth.services.js";
 import { ObjectId } from "mongodb";
+import { sendEmail } from "../emails/services.nodemailer.js";
+import fs from "fs/promises";
+import path from "path";
+import mjml2html from "mjml";
+import { sendEmailUsingResend } from "../emails/send-email.resend.js";
+import { sendEmailUsingSendGrid } from "../emails/send-email.sendgrid.js";
 
 //GET SIGN UP & LOGIN PAGE---------------------------
 
@@ -154,19 +167,151 @@ export const getProfilePage = async (req, res) => {
 };
 
 export const getVerifyEmailPage = (req, res) => {
-  if (!req.user) return res.redirect("/login");
+  if (!req.user) return res.redirect("/");
 
   return res.render("../views/pages/verifyemail.ejs", {
     email: req.user.email,
   });
 };
 
+export const postResendVerificationEmail = async (req, res) => {
+  if (!req.user) return res.redirect("/");
+  // const user = await getRegisteredUser(req.user);
+  const randomToken = generateRandomToken();
+  await insertVerifyEmailTokenInDB(req.user.id, randomToken);
+
+  const verifyEmailLink = createVerifyEmailLink({
+    email: req.user.email,
+    token: randomToken,
+  });
+
+  console.log("verifyEmailLink===>", verifyEmailLink);
+
+  const mjmlTemplate = await fs.readFile(
+    path.join(import.meta.dirname, "../", "emails", "verify-email.mjml"),
+    "utf-8"
+  );
+
+  const filledTemplate = mjmlTemplate
+    .replaceAll("{{token}}", randomToken)
+    .replaceAll("{{verifyUrl}}", verifyEmailLink);
+
+  const { html } = mjml2html(filledTemplate);
+
+  await sendEmailUsingSendGrid({
+    to: req.user.email,
+    sub: "VERIFY YOUR EMAIL",
+    html: html,
+  }).catch(console.error);
+
+  return res.redirect("/verify-email");
+};
+
+//It will verify the token
+export const VerifyEmailToken = async (req, res) => {
+  try {
+    // const email = req.query.email;
+    const token = req.query.token;
+
+    const verifyEmailToken = await verifyEmailTokensCollection.findOne({
+      user_id: req.user.id,
+      email_verification_token: token,
+    });
+    console.log(
+      token,
+      "under VerifyEmailToken====>",
+      req.user.id,
+      verifyEmailToken
+    );
+
+    if (
+      verifyEmailToken &&
+      new Date(verifyEmailToken.expires_at) > Date.now() &&
+      verifyEmailToken.email_verification_token === token
+    ) {
+      await registeredUsersCollection.updateOne(
+        { _id: new ObjectId(req.user.id) },
+        { $set: { isEmailValid: true } }
+      );
+      return res.redirect("/profile");
+    } else return res.redirect("/verify-email");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const getEditProfilePage = (req, res) => {
   try {
-    
   } catch {}
 };
+
 export const getChangePasswordPage = (req, res) => {
+  return res.render("../views/pages/change-password.ejs", {
+    title: "Change Password",
+    user: req.user,
+  });
+};
+
+//-----------------------------------------------------------
+
+export const postChangePassword = async (req, res) => {
   try {
-  } catch {}
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.user.id;
+
+    // Validate inputs
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New passwords do not match",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long",
+      });
+    }
+
+    // Get user from database
+    const user = await getRegisteredUser(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Verify current password
+    const isMatch = await argon2.verify(user.password, currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Update password in database
+    await updateUserPasswordInDB(currentUser, newPassword);
+
+    // Return success response
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while changing password",
+    });
+  }
 };

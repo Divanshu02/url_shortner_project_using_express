@@ -96,7 +96,21 @@ export const verifyAuthentication = async (req, res, next) => {
         });
         console.log("registered_user::-", registeredUser);
 
-        req.user = registeredUser;
+        req.user = {
+          id: registeredUser._id.toString(),
+          name: registeredUser.name,
+          email: registeredUser.email,
+          password: registeredUser.password,
+          createdAt: registeredUser.createdAt,
+          isEmailValid: registeredUser.isEmailValid,
+        };
+        //         req.user==> {
+        //   id: '68ad8b1ed6cc4b175a3a9e52',
+        //   name: 'Divanshu',
+        //   email: 'sharmadivanshu001@gmail.com',
+        //   iat: 1756204805,
+        //   exp: 1756204865
+        // }
 
         //Generate new access token
         const payload = {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up Page</title>
+    <title>Sign Up with Password Visibility Toggle</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for eye icons -->
@@ -143,7 +143,7 @@
         console.log("Submitting:", { name, email, password });
 
         // In a real application, you would have:
-        /*
+
         const res = await fetch("/signup", {
           method: "POST",
           headers: {
@@ -161,10 +161,6 @@
               "Email already exists, choose diff";
           }
         }
-        */
-
-        // For demo purposes, show success message
-        alert("Signup successful! (This is a demo)");
       });
 
       emailInput.addEventListener("input", () => {

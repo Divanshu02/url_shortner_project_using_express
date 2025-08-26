@@ -11,7 +11,6 @@
 
     <!-- 🧩 Profile Section -->
     <div class="pt-28 w-full max-w-xl mx-auto px-4">
-      <% if (registeredUser) { %>
       <div
         class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200"
       >
@@ -21,7 +20,7 @@
         >
           <h2 class="text-2xl font-bold tracking-wide">My Profile</h2>
           <p class="text-sm opacity-90">
-            Welcome back, <%= registeredUser.name.toUpperCase() %> 👋
+            Welcome back, <%= registeredUser?.name?.toUpperCase() %> 👋
           </p>
         </div>
 
@@ -29,7 +28,7 @@
         <div class="p-6 space-y-4">
           <div class="flex justify-between border-b pb-2">
             <span class="font-medium text-gray-600">Email</span>
-            <span class="text-gray-800"><%= registeredUser.email %></span>
+            <span class="text-gray-800"><%= registeredUser?.email %></span>
           </div>
 
           <div class="flex justify-between border-b pb-2">
@@ -40,7 +39,7 @@
           <div class="flex justify-between">
             <span class="font-medium text-gray-600">Member Since</span>
             <span class="text-gray-800">
-              <%= new Date(registeredUser.createdAt).toLocaleDateString() %>
+              <%= new Date(registeredUser?.createdAt)?.toLocaleDateString() %>
             </span>
           </div>
         </div>
@@ -69,7 +68,7 @@
             🚪 Logout
           </a>
         </div>
-        <% if (registeredUser.isEmailValid) { %>
+        <% if (registeredUser?.isEmailValid) { %>
         <!-- Email Verified -->
         <div class="flex justify-center mt-4">
           <span
@@ -94,7 +93,6 @@
         </div>
         <% } %>
       </div>
-      <% } %>
     </div>
   </body>
 </html>

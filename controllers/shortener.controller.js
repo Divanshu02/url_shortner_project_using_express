@@ -57,6 +57,7 @@ const postURLshortner = async (req, res) => {
     return res.status(400).send("shortCode already exists, pls choose diff");
   } else {
     const newLink = { user_id: req.user.id, shortcode: shortcode, url: url };
+    console.log("LINKSDATA===>", linksData);
 
     //push newlink to Database
     await pushLinksToLinksFile(newLink);
@@ -67,7 +68,7 @@ const postURLshortner = async (req, res) => {
 const redirectToShortLink = async (req, res) => {
   const { shortcode } = req.params;
 
-  const linksData = await getDataFromLinksFile(req?.user?.id); //get data from model
+  const linksData = await getDataFromLinksFile(req.user.id); //get data from model
 
   //get data from db whose obj matched with the params shortcode
   const link = linksData.find((link) => link.shortcode === shortcode);

@@ -11,9 +11,9 @@ export const getRegisteredUsers = async () => {
   return registeredUsers;
 };
 
-export const getRegisteredUser = async (user) => {
+export const getRegisteredUser = async (userId) => {
   const registeredUser = await registeredUsersCollection.findOne({
-    _id: new ObjectId(user.id),
+    _id: new ObjectId(userId),
   });
   return registeredUser;
 };
@@ -38,11 +38,11 @@ export const insertVerifyEmailTokenInDB = async (userId, token) => {
   });
 };
 
-export const updateUserPasswordInDB = async (user, newPassword) => {
+export const updateUserPasswordInDB = async (userId, newPassword) => {
   try {
     const hashNewPassword = await argon2.hash(newPassword);
     await registeredUsersCollection.updateOne(
-      { _id: user._id },
+      { _id: new ObjectId(userId) },
       { $set: { password: hashNewPassword } }
     );
   } catch (error) {

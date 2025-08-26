@@ -143,8 +143,9 @@ export const postSignupUser = async (req, res) => {
 //LOGOUT----
 export const logoutUser = async (req, res) => {
   console.log("under-logout", req.user);
+  const registeredUser = await getRegisteredUser(req.user.id);
   await sessionsCollection.updateMany(
-    { user_id: req.user.id },
+    { user_id: registeredUser._id.toString() },
     { $set: { isRefreshTokenRevoked: true } }
   );
   res.clearCookie("access_token");
@@ -156,7 +157,7 @@ export const logoutUser = async (req, res) => {
 
 export const getProfilePage = async (req, res) => {
   if (!req.user) return res.redirect("/login");
-  const registeredUser = await getRegisteredUser(req.user);
+  const registeredUser = await getRegisteredUser(req.user.id);
   const totalLinks = await getTotalNoOfLinks(req.user);
   console.log("registeredUser======>", registeredUser);
 
@@ -176,7 +177,6 @@ export const getVerifyEmailPage = (req, res) => {
 
 export const postResendVerificationEmail = async (req, res) => {
   if (!req.user) return res.redirect("/");
-  // const user = await getRegisteredUser(req.user);
   const randomToken = generateRandomToken();
   await insertVerifyEmailTokenInDB(req.user.id, randomToken);
 
@@ -264,6 +264,7 @@ export const postChangePassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
+        field: "currentPassword", // Indicate which field has error
       });
     }
 
@@ -271,6 +272,7 @@ export const postChangePassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "New passwords do not match",
+        field: "confirmPassword",
       });
     }
 
@@ -278,6 +280,7 @@ export const postChangePassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Password must be at least 8 characters long",
+        field: "newPassword",
       });
     }
 
@@ -296,11 +299,12 @@ export const postChangePassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Current password is incorrect",
+        field: "currentPassword",
       });
     }
 
     // Update password in database
-    await updateUserPasswordInDB(currentUser, newPassword);
+    await updateUserPasswordInDB(userId, newPassword);
 
     // Return success response
     res.json({

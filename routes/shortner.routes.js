@@ -16,7 +16,7 @@ router.get("/", getShortenerPage);
 
 router.post("/", postURLshortner);
 
-router.get("/:shortcode", redirectToShortLink);
+router.get("/shortlink/:shortcode", redirectToShortLink);
 
 router.get("/deleteShortener/:id", getDeleteShortenerPage);
 router.post("/deleteShortener/:id", postDeleteShortener);

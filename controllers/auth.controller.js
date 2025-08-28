@@ -3,15 +3,18 @@ import {
   getRegisteredUsers,
   getTotalNoOfLinks,
   insertVerifyEmailTokenInDB,
+  storeResetPasswordLinkInDB,
   updateUserPasswordInDB,
 } from "../models/auth.model.js";
 import {
   registeredUsersCollection,
+  resetPasswordCollection,
   sessionsCollection,
   verifyEmailTokensCollection,
 } from "../mongodb/db-client.js";
 import argon2 from "argon2";
 import {
+  createResetPasswordLink,
   createVerifyEmailLink,
   generateJwt,
   generateRandomToken,
@@ -23,6 +26,7 @@ import path from "path";
 import mjml2html from "mjml";
 import { sendEmailUsingResend } from "../emails/send-email.resend.js";
 import { sendEmailUsingSendGrid } from "../emails/send-email.sendgrid.js";
+import { Error } from "mongoose";
 
 //GET SIGN UP & LOGIN PAGE---------------------------
 
@@ -142,6 +146,8 @@ export const postSignupUser = async (req, res) => {
 
 //LOGOUT----
 export const logoutUser = async (req, res) => {
+  if (!req.user) return res.redirect("/login");
+
   console.log("under-logout", req.user);
   const registeredUser = await getRegisteredUser(req.user.id);
   await sessionsCollection.updateMany(
@@ -245,6 +251,41 @@ export const getEditProfilePage = (req, res) => {
   } catch {}
 };
 
+export const verifyResetPassword = async (req, res) => {
+  try {
+    console.log("verifying reset password token------------------");
+
+    const email = req.query.email;
+    const token = req.query.token;
+    const registeredUsers = await getRegisteredUsers();
+    const registeredUser = registeredUsers.find((user) => user.email === email);
+    console.log(registeredUser);
+
+    const verifyResetPasswordToken = await resetPasswordCollection.findOne({
+      user_id: registeredUser._id.toString(),
+      reset_password_token: token,
+    });
+    console.log(
+      token,
+      "under VerifyResetPasswordToken====>",
+      registeredUser._id.toString(),
+      verifyResetPasswordToken
+    );
+
+    if (
+      verifyResetPasswordToken &&
+      new Date(verifyResetPasswordToken.expires_at) > Date.now() &&
+      argon2.verify(verifyResetPasswordToken.reset_password_token, token)
+    ) {
+      const encodedToken = encodeURIComponent(token);
+
+      return res.redirect(`/reset-password/${encodedToken}`);
+    } else return res.redirect("/forgot-password");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const getChangePasswordPage = (req, res) => {
   return res.render("../views/pages/change-password.ejs", {
     title: "Change Password",
@@ -316,6 +357,164 @@ export const postChangePassword = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "An error occurred while changing password",
+    });
+  }
+};
+
+export const getForgotPasswordPage = (req, res) => {
+  return res.render("../views/pages/forgot-password.ejs");
+};
+
+export const getResetPasswordPage = async (req, res) => {
+  const { token } = req.params;
+  const decodedToken = decodeURIComponent(token);
+
+  const resetPasswordToken = await resetPasswordCollection.findOne({
+    reset_password_token: decodedToken,
+  });
+
+  if (!resetPasswordToken) return res.status(400).send("INTERNAL SERVER ERROR");
+  return res.render("../views/pages/reset-password.ejs", { decodedToken });
+};
+
+export const postResetPassword = async (req, res) => {
+  try {
+    console.log("post reset password--------------------------------");
+
+    const { token } = req.params;
+    if (!token) throw new Error("INTERVAL SERVER ERROR");
+
+    // const decodedToken = decodeURIComponent(token); // ✅ Decode first!
+
+    const { newPassword, confirmPassword } = req.body;
+
+    const resetPasswordToken = await resetPasswordCollection.findOne({
+      reset_password_token: token,
+    });
+
+    console.log("resetPasswordToken===>", resetPasswordToken, token);
+
+    if (!resetPasswordToken)
+      return res.status(400).send("Sorry, you are not permitted");
+
+    const userId = resetPasswordToken.user_id;
+
+    // Validate inputs
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+        field: "currentPassword", // Indicate which field has error
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New passwords do not match",
+        field: "confirmPassword",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long",
+        field: "newPassword",
+      });
+    }
+
+    // Get user from database
+    const user = await getRegisteredUser(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update password in database
+    await updateUserPasswordInDB(userId, newPassword);
+
+    // Return success response
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while changing password",
+    });
+  }
+};
+export const sendResetPasswordLinkToGmail = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const registeredUsers = await getRegisteredUsers();
+    const user = registeredUsers.find((user) => user.email === email);
+    if (!user)
+      return res.status(400).json({
+        success: false,
+        message: "Email doesn't exists",
+      });
+
+    //Store token in db
+    await storeResetPasswordLinkInDB(user);
+
+    const resetPasswordLink = await resetPasswordCollection.findOne({
+      user_id: user._id.toString(),
+    });
+
+    const newResetPasswordLink = createResetPasswordLink({
+      email: user.email,
+      token: resetPasswordLink.reset_password_token,
+    });
+
+    const mjmlTemplate = await fs.readFile(
+      path.join(
+        import.meta.dirname,
+        "../",
+        "views",
+        "pages",
+        "reset-password-gmail-template.mjml"
+      ),
+      "utf-8"
+    );
+
+    const filledTemplate = mjmlTemplate.replaceAll(
+      "{{resetLink}}",
+      newResetPasswordLink
+    );
+
+    const { html } = mjml2html(filledTemplate);
+
+    await sendEmailUsingSendGrid({
+      to: email,
+      sub: "Reset Your Password",
+      html: html,
+    }).catch(console.error);
+
+    // await sendEmail({
+    //   to: user.email,
+    //   sub: "Reset your Password",
+    //   html: `
+    //   <p>The token to reset the password is: ${resetPasswordLink.token}</p>
+    //   <a href=${newResetPasswordLink}>Click here </a>
+    //   Link:${newResetPasswordLink}
+    //   `,
+    // });
+
+    return res.status(200).json({
+      success: true,
+      message: "Link Sent successfully",
+    });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
     });
   }
 };

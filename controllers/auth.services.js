@@ -34,6 +34,9 @@ export const createVerifyEmailLink = ({ email, token }) => {
   return url;
 };
 
-
-
-
+export const createResetPasswordLink = ({ email, token }) => {
+  const url = new URL(`${process.env.FRONTEND_URL}/verify-reset-password`);
+  url.searchParams.append("email", email);
+  url.searchParams.append("token", token);
+  return url;
+};

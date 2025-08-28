@@ -1,10 +1,12 @@
 import {
   registeredUsersCollection,
+  resetPasswordCollection,
   verifyEmailTokensCollection,
 } from "../mongodb/db-client.js";
 import { shortenerCollection } from "../mongodb/db-client.js";
 import { ObjectId } from "mongodb";
 import argon2 from "argon2";
+import { generateRandomToken } from "../controllers/auth.services.js";
 
 export const getRegisteredUsers = async () => {
   const registeredUsers = await registeredUsersCollection.find().toArray();
@@ -47,5 +49,42 @@ export const updateUserPasswordInDB = async (userId, newPassword) => {
     );
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const storeResetPasswordLinkInDB = async (user) => {
+  const randomToken = generateRandomToken();
+  const hashedToken = await argon2.hash(randomToken);
+  const createdAt = new Date();
+  const expiresAt = new Date(createdAt.getTime() + 15 * 60 * 1000); // 15 minutes later
+
+  console.log("resetPasswordTokenInDB===>", hashedToken);
+
+  const resetPasswordLink = await resetPasswordCollection.findOne({
+    user_id: user._id.toString(),
+  });
+
+  console.log("resetPasswordLink===>", resetPasswordLink);
+
+  if (!resetPasswordLink) {
+    await resetPasswordCollection.insertOne({
+      user_id: user._id.toString(),
+      reset_password_token: hashedToken,
+      created_at: createdAt,
+      expires_at: expiresAt,
+    });
+    return;
+  }
+
+  console.log("Local date==", resetPasswordLink.expires_at.toLocaleString());
+
+  if (resetPasswordLink.expires_at < new Date()) {
+    await resetPasswordCollection.deleteMany({ user_id: user._id.toString() });
+    await resetPasswordCollection.insertOne({
+      user_id: user._id.toString(),
+      reset_password_token: hashedToken,
+      created_at: createdAt,
+      expires_at: expiresAt,
+    });
   }
 };

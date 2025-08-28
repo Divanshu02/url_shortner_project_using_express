@@ -61,6 +61,15 @@
         </button>
       </form>
 
+      <div class="mt-4 text-center">
+        <a
+          href="/forgot-password"
+          class="text-sm text-indigo-600 font-medium hover:underline"
+        >
+          Forgot your password?
+        </a>
+      </div>
+
       <p class="mt-6 text-sm text-center text-gray-600">
         Don't have an account?
         <a href="/signup" class="text-indigo-600 font-medium hover:underline"
@@ -101,8 +110,6 @@
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-
-        // console.log("logindets", email, password);
 
         const res = await fetch("/login", {
           method: "POST",

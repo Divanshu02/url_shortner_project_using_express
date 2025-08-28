@@ -374,7 +374,7 @@ export const getResetPasswordPage = async (req, res) => {
   });
 
   if (!resetPasswordToken) return res.status(400).send("INTERNAL SERVER ERROR");
-  return res.render("../views/pages/reset-password.ejs", { decodedToken });
+  return res.render("../views/pages/reset-password.ejs", { token });
 };
 
 export const postResetPassword = async (req, res) => {
@@ -384,12 +384,12 @@ export const postResetPassword = async (req, res) => {
     const { token } = req.params;
     if (!token) throw new Error("INTERVAL SERVER ERROR");
 
-    // const decodedToken = decodeURIComponent(token); // ✅ Decode first!
+    const decodedToken = decodeURIComponent(token); // ✅ Decode first!
 
     const { newPassword, confirmPassword } = req.body;
 
     const resetPasswordToken = await resetPasswordCollection.findOne({
-      reset_password_token: token,
+      reset_password_token: decodedToken,
     });
 
     console.log("resetPasswordToken===>", resetPasswordToken, token);
